@@ -6,7 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { getAttendanceRecords, calculateHoursWorked, seedInitialData } from '@/services/attendanceService';
+import { 
+  getAttendanceRecords, 
+  calculateHoursWorked, 
+  seedInitialData 
+} from '@/services/attendanceService';
 import { AttendanceRecord } from '@/lib/types';
 import { Search } from 'lucide-react';
 

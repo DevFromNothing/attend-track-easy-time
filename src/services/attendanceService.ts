@@ -1,24 +1,9 @@
+
 import { AttendanceRecord, CheckInOutResponse } from "@/lib/types";
 import { getCurrentUser } from "./authService";
-
-// Simulate a database with localStorage
-const STORAGE_KEY = 'attendance_records';
-
-// Helper to get all records
-const getAllRecords = (): AttendanceRecord[] => {
-  const records = localStorage.getItem(STORAGE_KEY);
-  return records ? JSON.parse(records) : [];
-};
-
-// Helper to save all records
-const saveAllRecords = (records: AttendanceRecord[]): void => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-};
-
-// Helper to format date for storage
-const formatDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
-};
+import { getAllRecords, saveAllRecords } from "./utils/storageUtils";
+import { formatDate, calculateHoursWorked } from "./utils/dateUtils";
+import { seedInitialData } from "./utils/mockData";
 
 // Check if user already checked in today
 const hasCheckedInToday = (userId: string): boolean => {
@@ -168,54 +153,5 @@ export const getAttendanceRecords = async (
   );
 };
 
-// Seed some initial data if none exists
-export const seedInitialData = () => {
-  if (getAllRecords().length === 0) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const twoDaysAgo = new Date();
-    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-    
-    const mockData: AttendanceRecord[] = [
-      {
-        id: '1',
-        employeeId: '2',
-        employeeName: 'John Smith',
-        checkInTime: new Date(yesterday.setHours(9, 0, 0)).toISOString(),
-        checkOutTime: new Date(yesterday.setHours(17, 30, 0)).toISOString(),
-        attendanceDate: formatDate(yesterday)
-      },
-      {
-        id: '2',
-        employeeId: '3',
-        employeeName: 'Jane Doe',
-        checkInTime: new Date(yesterday.setHours(8, 45, 0)).toISOString(),
-        checkOutTime: new Date(yesterday.setHours(18, 0, 0)).toISOString(),
-        attendanceDate: formatDate(yesterday)
-      },
-      {
-        id: '3',
-        employeeId: '2',
-        employeeName: 'John Smith',
-        checkInTime: new Date(twoDaysAgo.setHours(9, 15, 0)).toISOString(),
-        checkOutTime: new Date(twoDaysAgo.setHours(16, 45, 0)).toISOString(),
-        attendanceDate: formatDate(twoDaysAgo)
-      }
-    ];
-    
-    saveAllRecords(mockData);
-  }
-};
-
-// Calculate hours worked from check-in and check-out times
-export const calculateHoursWorked = (checkIn: string, checkOut: string | null): string => {
-  if (!checkOut) return '0';
-  
-  const startTime = new Date(checkIn).getTime();
-  const endTime = new Date(checkOut).getTime();
-  const diffMs = endTime - startTime;
-  const diffHrs = diffMs / (1000 * 60 * 60);
-  
-  return diffHrs.toFixed(2);
-};
+// Re-export functions from utility files
+export { formatDate, calculateHoursWorked, seedInitialData };
