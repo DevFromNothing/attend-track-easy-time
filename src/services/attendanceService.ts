@@ -1,4 +1,3 @@
-
 import { AttendanceRecord, CheckInOutResponse } from "@/lib/types";
 import { getCurrentUser } from "./authService";
 
@@ -26,8 +25,17 @@ const hasCheckedInToday = (userId: string): boolean => {
   const today = formatDate(new Date());
   return getAllRecords().some(
     record => record.employeeId === userId && 
+              record.attendanceDate === today
+  );
+};
+
+// Check if user already checked out today
+const hasCheckedOutToday = (userId: string): boolean => {
+  const today = formatDate(new Date());
+  return getAllRecords().some(
+    record => record.employeeId === userId && 
               record.attendanceDate === today && 
-              !record.checkOutTime
+              record.checkOutTime !== null
   );
 };
 
@@ -36,8 +44,7 @@ const findTodayCheckIn = (userId: string): AttendanceRecord | undefined => {
   const today = formatDate(new Date());
   return getAllRecords().find(
     record => record.employeeId === userId && 
-              record.attendanceDate === today && 
-              !record.checkOutTime
+              record.attendanceDate === today
   );
 };
 
@@ -83,6 +90,16 @@ export const checkOut = async (): Promise<CheckInOutResponse> => {
     return { success: false, message: 'User not authenticated' };
   }
   
+  // Check if already checked out
+  if (hasCheckedOutToday(user.userId)) {
+    return { success: false, message: 'You have already checked out today' };
+  }
+  
+  // Check if hasn't checked in
+  if (!hasCheckedInToday(user.userId)) {
+    return { success: false, message: 'You must check in before checking out' };
+  }
+  
   // Find active check-in
   const allRecords = getAllRecords();
   const recordIndex = allRecords.findIndex(
@@ -113,16 +130,10 @@ export const getAttendanceStatus = (): { checkedIn: boolean, checkedOut: boolean
     return { checkedIn: false, checkedOut: false };
   }
   
-  const todayRecord = findTodayCheckIn(user.userId);
+  const checkedIn = hasCheckedInToday(user.userId);
+  const checkedOut = hasCheckedOutToday(user.userId);
   
-  if (!todayRecord) {
-    return { checkedIn: false, checkedOut: false };
-  }
-  
-  return {
-    checkedIn: true,
-    checkedOut: !!todayRecord.checkOutTime
-  };
+  return { checkedIn, checkedOut };
 };
 
 export const getAttendanceRecords = async (

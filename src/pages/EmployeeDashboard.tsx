@@ -171,7 +171,7 @@ const EmployeeDashboard = () => {
             <CardFooter className="flex justify-center border-t p-4">
               <div className="text-center">
                 {attendanceStatus.checkedIn && !attendanceStatus.checkedOut && (
-                  <span className="time-badge">
+                  <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                     You are currently checked in
                   </span>
                 )}
